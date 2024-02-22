@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Defines.h"
+
 #include <string>
 #include <vector>
 
@@ -14,7 +16,7 @@ namespace hro
     CompressionMode ParseCompressionMode(const char *f);
 
     const int ASSET_TYPE_SIZE = 4;
-    class Asset
+    class HAPI Asset
     {
     public:
         char type[ASSET_TYPE_SIZE];

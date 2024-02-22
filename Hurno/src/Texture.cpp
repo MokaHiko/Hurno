@@ -36,13 +36,6 @@ namespace hro
 			"RGBA8",
 		};
 
-		nlohmann::json meta_data = {};
-		meta_data["format"] = format_look_up[(int)info.format];
-		meta_data["width"] = info.pixel_size[0];
-		meta_data["height"] = info.pixel_size[1];
-		meta_data["size"] = info.size;
-		meta_data["original_file_path"] = info.original_file_path;
-
 		type[0] = 'T';
 		type[1] = 'E';
 		type[2] = 'X';
@@ -50,6 +43,13 @@ namespace hro
 		type[3] = 'I';
 
 		version = 1;
+
+		nlohmann::json meta_data = {};
+		meta_data["format"] = format_look_up[(int)info.format];
+		meta_data["width"] = info.pixel_size[0];
+		meta_data["height"] = info.pixel_size[1];
+		meta_data["size"] = info.size;
+		meta_data["original_file_path"] = info.original_file_path;
 
 		int compressed_bound = LZ4_compressBound(info.size);
 		packed_data.resize(compressed_bound);

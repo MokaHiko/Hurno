@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Defines.h"
+
 #include <string.h>
 #include <cstdint>
 
@@ -26,12 +28,11 @@ namespace hro
         std::string original_file_path;
     };
 
-    class Texture : public Asset
+    class HAPI Texture : public Asset
     {
     public:
         Texture() = default;
-        // Texture from texture info
-        Texture(TextureInfo& texture_info);
+        Texture(TextureInfo& texture_info); // Texture from texture info
 
         virtual ~Texture();
 

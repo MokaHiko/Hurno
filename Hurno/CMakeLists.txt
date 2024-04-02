@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.2.0)
 project(Hurno VERSION 0.1.0 LANGUAGES C CXX)
 
 include(CTest)
@@ -27,6 +27,12 @@ add_library(${PROJECT_NAME}
 
 						src/Material.h
 						src/Material.cpp 
+
+						src/SkeletalMesh.h
+						src/SkeletalMesh.cpp
+						
+						src/Animation.h
+						src/Animation.cpp
 
 						src/Impl/AssimpImpl.h
 						src/Impl/AssimpImpl.cpp

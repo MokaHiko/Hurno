@@ -19,30 +19,28 @@ namespace hro
 
 	TextureFormat ParseTextureFormat(const char* f);
 
-    struct TextureInfo
+    struct TextureInfo : public AssetInfo
     {
         TextureFormat format; // Format of the texture
         uint64_t size; // Size of the texture in bytes
-        CompressionMode compression_mode;
         uint32_t pixel_size[2]; // width, height 
-        std::string original_file_path;
+
+        // Returns the size of raw data when unpacked
+        virtual const uint64_t UnpackedSize() const override 
+        {
+            return size;
+        }
     };
 
     class HAPI Texture : public Asset
     {
     public:
         Texture() = default;
-        Texture(TextureInfo& texture_info); // Texture from texture info
+        virtual ~Texture() = default;
 
-        virtual ~Texture();
-
-        virtual void Pack(void* raw_data, size_t raw_data_size) override;
-        virtual void Unpack(void* dst_buffer) override;
-
-        const TextureInfo& Info() const {return info;}
+        virtual void ParseInfo(AssetInfo* out) override;
     protected:
-        virtual bool ParseInfo(const char* meta_data) override;
-    private:
-        TextureInfo info = {};
+        virtual void PackImpl(const AssetInfo* in, void* raw_data, size_t raw_data_size) override;
+        virtual void UnpackImpl(const AssetInfo* in, void* dst_buffer) override;
     };
 }

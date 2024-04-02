@@ -1,9 +1,60 @@
 #include "Asset.h"
 
 #include <fstream>
+#include <assert.h>
 
 namespace hro
 {
+	void Asset::Pack(const AssetInfo* info, void* raw_data, size_t raw_data_size)
+	{
+		assert(info != nullptr, && "Info passed cannot be nullptr!");
+		if(IsPacked())
+		{
+			printf("Asset already packed!\n");
+			return;
+		}
+
+		PackImpl(info, raw_data, raw_data_size);
+		m_packed = true;
+	}
+
+	void Asset::Pack(const AssetInfo* info)
+	{
+		assert(info != nullptr, && "Info passed cannot be nullptr!");
+		if(IsPacked())
+		{
+			printf("Asset already packed!\n");
+			return;
+		}
+
+		PackImpl(info);
+		m_packed = true;
+	}
+
+	void Asset::Pack()
+	{
+		if(IsPacked())
+		{
+			printf("Asset already packed!\n");
+			return;
+		}
+
+		PackImpl();
+		m_packed = true;
+	}
+
+	void Asset::Unpack(const AssetInfo* info, void* dst_buffer)
+	{
+		if(!IsPacked())
+		{
+			printf("Asset already unpacked!\n");
+			return;
+		}
+
+		UnpackImpl(info, dst_buffer);
+		m_packed = false;
+	}
+
 	bool Asset::Load(const char* path)
 	{
 		std::ifstream file;
@@ -28,16 +79,24 @@ namespace hro
 		json_meta_data.resize(static_cast<size_t>(meta_data_size));
 		file.read((char*)json_meta_data.data(), meta_data_size);
 
+		// Read in packed data
 		packed_data.resize(static_cast<size_t>(packed_data_size));
 		file.read(packed_data.data(), packed_data_size);
+		m_packed = true;
 
 		file.close();
-
-		return ParseInfo(json_meta_data.c_str());
+		
+		return m_loaded = true;
 	}
 
 	bool Asset::Save(const char* path)
 	{
+		if(!IsPacked())
+		{
+			printf("Asset cannot be saved without upacked!\n");
+			return false;
+		}
+
 		std::ofstream file;
 		file.open(path, std::ios::binary | std::ios::out);
 
@@ -72,4 +131,12 @@ namespace hro
         else
             return CompressionMode::None;
 	}
-} // namespace hro
+	const std::string FileNameFromFullPath(const std::string& full_path)
+    {
+        auto first = full_path.find_last_of("/\\") + 1;
+        auto last = full_path.find_last_of(".");
+
+        auto it = last - first;
+        return full_path.substr(first, last - first);
+    }
+} 

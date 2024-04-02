@@ -4,11 +4,14 @@
 #pragma once
 
 #include "Asset.h"
+#include "cassert"
+
+#define MAX_BONES_PER_VERTEX 4
 
 namespace hro
 {
     // Vertex format all in f32
-    struct HAPI Vertex_F32_PNCV 
+    struct HAPI Vertex_F32_PNCV
     {
         float position[3];
         float color[3];
@@ -16,25 +19,72 @@ namespace hro
         float uv[2];
     };
 
+    struct HAPI Vertex_F32_PNCV_U32F32_BIW
+    {
+        float position[3];
+        float color[3];
+        float normal[3];
+        float uv[2];
+
+        uint32_t ids[MAX_BONES_PER_VERTEX];
+        float weights[MAX_BONES_PER_VERTEX];
+    };
+
     enum class VertexFormat : uint8_t
     {
-        Uknown, 
+        Uknown,
         F32_PNCV
     };
 
     enum class IndexFormat : uint8_t
     {
-        Uknown, 
+        Uknown,
         UINT32
+    };
+
+    struct VertexBoneData
+    {
+        uint32_t ids[MAX_BONES_PER_VERTEX] = { 0 };
+        float weights[MAX_BONES_PER_VERTEX] = { 0 };
+
+        void AddWeight(uint32_t bone_id, float weight)
+        {
+            for (int i = 0; i < MAX_BONES_PER_VERTEX; i++)
+            {
+                if (weights[i] <= 0.0f)
+                {
+                    ids[i] = bone_id;
+                    weights[i] = weight;
+
+                    return;
+                }
+            }
+            // printf("max bones exceeded!\n");
+            //assert(0 && "Cannot add more than max bones!");
+        }
+    };
+
+    struct Joint
+    {
+        float inverse_bind_pose_transform[16] = { 0.0f };
+        char name_buffer[64]{};
     };
 
     struct MeshInfo
     {
-        VertexFormat vertex_format; 
-        uint64_t vertex_buffer_size; 
+        // Returns the number of vertices of this mesh
+        const uint32_t GetVertexCount() const;
 
-        IndexFormat index_format; 
-        uint64_t index_buffer_size; 
+        // Returns the number of indices of this mesh
+        const uint32_t GetIndexCount() const;
+
+        VertexFormat vertex_format;
+        uint64_t vertex_buffer_size;
+
+        IndexFormat index_format;
+        uint64_t index_buffer_size;
+
+        uint32_t bone_count;
 
         std::string name;
 
@@ -45,9 +95,27 @@ namespace hro
         std::string original_file_path;
     };
 
-    struct HAPI Mesh 
+    class HAPI Mesh : public Asset
     {
+    public:
+        // Parses the model meta data into out 
+        virtual void ParseInfo(AssetInfo* out) override;
+    public:
+        std::string name;
 
+        VertexFormat vertex_format;
+        IndexFormat index_format;
+
+        uint32_t bone_count;
+
+        CompressionMode compression_mode;
+        std::string original_file_path;
+
+        std::vector<Vertex_F32_PNCV> vertices;
+        std::vector<uint32_t> indices;
+    protected:
+        virtual void PackImpl() override;
+        virtual void UnpackImpl(const AssetInfo* in, void* dst_buffer) override;
     };
 }
 

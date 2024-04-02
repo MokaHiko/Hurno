@@ -47,8 +47,8 @@ namespace hro
 		info.pixel_size[1] = height;
 		info.original_file_path = path;
 
-		Texture texture(info);
-		texture.Pack(data, texture_size);
+		hro::Texture texture {};
+		texture.Pack(&info, data, texture_size);
 
 		stbi_image_free(data);
 
@@ -83,8 +83,8 @@ namespace hro
         info.pixel_size[1] = height;
         info.size = texture_size;
 
-		Texture texture(info);
-		texture.Pack(data, texture_size);
+		Texture texture {};
+		texture.Pack(&info, data, texture_size);
 
 		stbi_image_free(data);
 

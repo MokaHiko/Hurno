@@ -4,29 +4,26 @@
 
 #include "Asset.h"
 #include "Mesh.h"
-
 #include "Material.h"
+#include "Animation.h"
 
 namespace hro
 {
-    struct HAPI ModelInfo
+    struct HAPI ModelInfo : public AssetInfo
     {
-        ModelInfo()
+        ModelInfo() {}
+
+        uint64_t bone_mapping_size = 0;  // size of bone_mapping in bytes
+        uint64_t bone_matrices_size = 0;  // size of bone_matrices buffer in bytes
+
+        // Returns the size of raw data when unpacked
+        virtual const uint64_t UnpackedSize() const override 
         {
-            //printf("ModelInfo Created!\n");
-        }
-        uint64_t vertex_buffer_size; // size of vertex buffer in bytes
-        uint64_t index_buffer_size;  // size of vertex buffer in bytes
+            return bone_mapping_size + bone_matrices_size;
+        };
 
-        CompressionMode compression_mode;
-
-        uint64_t mesh_count;
-        std::vector<MeshInfo> mesh_infos;
-
-        uint64_t material_count;
-        std::vector<Material> materials;
-
-        std::string original_file_path;
+        uint64_t material_count = 0;
+        std::vector<Material> materials = {};
     };
 
     /*
@@ -36,17 +33,21 @@ namespace hro
     {
     public:
         // Texture from texture info
-        Model(ModelInfo&& model_info);
         Model() = default;
         ~Model() = default;
 
-        virtual void Pack(void* raw_data, size_t raw_data_size) override;
-        virtual void Unpack(void* dst_buffer) override;
+        // Path to meshes
+        std::vector<MeshInfo> mesh_infos = {};
 
-        const ModelInfo& Info() const { return info; }
-    protected:
-        virtual bool ParseInfo(const char* meta_data) override;
-    private:
-        ModelInfo info;
+        // Path to skeletal mesh
+        std::string skeletal_mesh_path;
+
+        virtual void ParseInfo(AssetInfo* out) override;
+
+        virtual void PackImpl(const AssetInfo* in, void* raw_data, size_t raw_data_size) override;
+        virtual void UnpackImpl(const AssetInfo* in, void* dst_buffer) override;
+
+        void* BoneBuffer(ModelInfo* info, void* data);
+        void* VertexBoneMapBuffer(ModelInfo* info, void* data);
     };
 }

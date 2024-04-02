@@ -17,16 +17,7 @@ namespace hro
 			return TextureFormat::Unknown;
 	}
 
-	Texture::Texture(TextureInfo& texture_info)
-		:info(texture_info)
-	{
-	}
-
-	Texture::~Texture()
-	{
-	}
-
-	void Texture::Pack(void* raw_data, size_t raw_data_size)
+	void Texture::PackImpl(const AssetInfo* in, void* raw_data, size_t raw_data_size)
 	{
 		static const char* format_look_up[] =
 		{
@@ -44,28 +35,32 @@ namespace hro
 
 		version = 1;
 
-		nlohmann::json meta_data = {};
-		meta_data["format"] = format_look_up[(int)info.format];
-		meta_data["width"] = info.pixel_size[0];
-		meta_data["height"] = info.pixel_size[1];
-		meta_data["size"] = info.size;
-		meta_data["original_file_path"] = info.original_file_path;
+		const TextureInfo* info = static_cast<const TextureInfo*>(in);
 
-		int compressed_bound = LZ4_compressBound(info.size);
+		nlohmann::json meta_data = {};
+		meta_data["format"] = format_look_up[(int)info->format];
+		meta_data["width"] = info->pixel_size[0];
+		meta_data["height"] = info->pixel_size[1];
+
+		meta_data["size"] = info->size;
+		meta_data["original_file_path"] = info->original_file_path;
+		meta_data["compression_mode"] = "LZ4";
+
+		int compressed_bound = LZ4_compressBound(info->size);
 		packed_data.resize(compressed_bound);
 		int compressed_size = LZ4_compress_default((const char*)raw_data, packed_data.data(), raw_data_size, compressed_bound);
 		packed_data.resize(compressed_size);
 
-		meta_data["compression_mode"] = "LZ4";
-
 		json_meta_data = meta_data.dump();
 	}
 
-	void Texture::Unpack(void* dst_buffer)
+	void Texture::UnpackImpl(const AssetInfo* in, void* dst_buffer)
 	{
-		if (info.compression_mode == CompressionMode::LZ4)
+		const TextureInfo* info = static_cast<const TextureInfo*>(in);
+
+		if (info->compression_mode == CompressionMode::LZ4)
 		{
-			LZ4_decompress_safe(packed_data.data(), (char*)dst_buffer, packed_data.size(), info.size);
+			LZ4_decompress_safe(packed_data.data(), (char*)dst_buffer, packed_data.size(), info->size);
 		}
 		else
 		{
@@ -74,22 +69,25 @@ namespace hro
 		}
 	}
 
-	bool Texture::ParseInfo(const char* meta_data) 
-	{ 
+	void Texture::ParseInfo(AssetInfo* out)
+	{
+		assert(out != nullptr && "Asset info pointer is null!");
+		assert(json_meta_data.c_str() != nullptr && "Meta data string is null!");
+
 		nlohmann::json texture_metadata = nlohmann::json::parse(json_meta_data);
 
-		std::string format_string = texture_metadata["format"];
-		info.format = ParseTextureFormat(format_string.c_str());
+		TextureInfo* info = static_cast<TextureInfo*>(out);
 
-		info.pixel_size[0] = texture_metadata["width"];
-		info.pixel_size[1] = texture_metadata["height"];
-		info.size = texture_metadata["size"];
-		info.original_file_path = texture_metadata["original_file_path"];
+		std::string format_string = texture_metadata["format"];
+		info->format = ParseTextureFormat(format_string.c_str());
+
+		info->pixel_size[0] = texture_metadata["width"];
+		info->pixel_size[1] = texture_metadata["height"];
+		info->size = texture_metadata["size"];
+		info->original_file_path = texture_metadata["original_file_path"];
 
 		std::string compression_string = texture_metadata["compression_mode"];
-		info.compression_mode = ParseCompressionMode(compression_string.c_str());
-
-		return true;
+		info->compression_mode = ParseCompressionMode(compression_string.c_str());
 	}
 
 } // namespace hro

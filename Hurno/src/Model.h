@@ -36,8 +36,11 @@ namespace hro
         Model() = default;
         ~Model() = default;
 
-        // Path to meshes
+        // Meshes in model
         std::vector<MeshInfo> mesh_infos = {};
+
+        // Animations used in model
+        std::vector<std::string> animation_paths = {};
 
         // Path to skeletal mesh
         std::string skeletal_mesh_path;

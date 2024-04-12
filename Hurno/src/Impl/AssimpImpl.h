@@ -101,6 +101,7 @@ public:
             const aiAnimation* ai_animation = scene->mAnimations[i];
             hro::Animation animation = {};
             animation.name = ai_animation->mName.C_Str();
+            animation.name = animation.name.substr(animation.name.find_last_of("|") + 1);
             animation.ticks = ai_animation->mDuration;
             animation.ticks_per_second = ai_animation->mTicksPerSecond;
 
@@ -264,8 +265,7 @@ private:
             vertex_to_joints.resize(vertex_to_joints.size() + mesh->mNumVertices);
 
             // Offset by node index
-            int node_index = 0;
-            for(uint32_t bone_id = node_index; bone_id < mesh->mNumBones; bone_id++)
+            for(uint32_t bone_id = 0; bone_id < mesh->mNumBones; bone_id++)
             {
                 hro::VertexBoneData vertex_bone_data = {};
                 aiBone* ai_bone = mesh->mBones[bone_id];
@@ -273,13 +273,8 @@ private:
                 // Push vertex to bone mapping
                 for(uint32_t i = 0; i < ai_bone->mNumWeights; i++)
                 {
-                    uint32_t vertex_index = node_index + ai_bone->mWeights[i].mVertexId;
+                    uint32_t vertex_index = ai_bone->mWeights[i].mVertexId;
                     float bone_weight = ai_bone->mWeights[i].mWeight;
-
-                    if (bone_weight <= 0.0f)
-                    {
-                        continue;
-                    }
 
                     vertex_to_joints[vertex_index].AddWeight(bone_id, bone_weight);
                 }

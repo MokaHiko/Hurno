@@ -28,7 +28,8 @@ namespace hro
 			aiProcess_CalcTangentSpace |
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_PopulateArmatureData |
-			aiProcess_SortByPType;
+			aiProcess_SortByPType |
+			aiProcess_LimitBoneWeights;
 
 		if (flip_uvs)
 		{
@@ -100,12 +101,16 @@ namespace hro
 			info.original_file_path = std::string(path);
 
 			animation.Pack(&info);
-			const std::string out_path = "assets/animations/" + std::string("test") + ".yanimation";
+			const std::string out_path = "assets/animations/" + animation.name + ".yanimation";
 
 			// TODO: Force pathable file name
 			if (!animation.Save(out_path.c_str()))
 			{
 				std::cout << "Failed to save animation at: " << out_path << std::endl;
+			}
+			else
+			{
+				model.animation_paths.push_back(out_path);
 			}
 		}
 

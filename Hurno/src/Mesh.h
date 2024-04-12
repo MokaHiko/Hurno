@@ -45,13 +45,27 @@ namespace hro
     struct VertexBoneData
     {
         uint32_t ids[MAX_BONES_PER_VERTEX] = { 0 };
-        float weights[MAX_BONES_PER_VERTEX] = { 0 };
+        float weights[MAX_BONES_PER_VERTEX] = { 0.0f };
 
         void AddWeight(uint32_t bone_id, float weight)
         {
+            // Skip bones with no weights
+            if(weight == 0.0f)
+            {
+                return;
+            };
+
             for (int i = 0; i < MAX_BONES_PER_VERTEX; i++)
             {
-                if (weights[i] <= 0.0f)
+                if (weights[i] == 0.0f)
+                {
+                    ids[i] = bone_id;
+                    weights[i] = weight;
+
+                    return;
+                }
+
+                if (ids[i] == bone_id && weights[i] < weight)
                 {
                     ids[i] = bone_id;
                     weights[i] = weight;
@@ -59,6 +73,7 @@ namespace hro
                     return;
                 }
             }
+
             // printf("max bones exceeded!\n");
             //assert(0 && "Cannot add more than max bones!");
         }

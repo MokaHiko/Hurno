@@ -14,21 +14,26 @@ int main()
 {
 	PrintFullPath(".\\");
 
-	printf("\n\n");
-	hro::ConvertModel("assets/models/plane.fbx", "assets/models/plane.yo", true);
-	printf("\n\n");
-	hro::ConvertModel("assets/models/pine.obj", "assets/models/pine.yo", true);
-	printf("\n\n");
-	hro::ConvertModel("assets/models/cube.obj", "assets/models/cube.yo");
-	
-	printf("\n\n");
-	hro::ConvertModel("assets/models/character-digger.fbx", "assets/models/character-digger.yo", true);
+	//printf("\n\n");
+	//hro::ConvertModel("assets/models/plane.fbx", "assets/models/plane.yo", true);
+	//printf("\n\n");
+	//hro::ConvertModel("assets/models/pine.obj", "assets/models/pine.yo", true);
+	//printf("\n\n");
+	//hro::ConvertModel("assets/models/cube.obj", "assets/models/cube.yo");
+	//
+	//printf("\n\n");
+	//hro::ConvertModel("assets/models/character-digger.fbx", "assets/models/character-digger.yo", true);
 
-	printf("\n\n");
-	hro::ConvertModel("assets/models/Peasant.fbx", "assets/models/Peasant.yo", false);
+	//printf("\n\n");
+	//hro::ConvertModel("assets/models/Peasant.fbx", "assets/models/Peasant.yo", false);
 
-	printf("\n\n");
-	hro::ConvertModel("assets/models/mutant.fbx", "assets/models/mutant.yo", true);
+	//printf("\n\n");
+	//hro::ConvertModel("assets/models/Humanoid.dae", "assets/models/Humanoid.yo", false);
+	//hro::ConvertModel("assets/models/HipHopDancing.dae", "assets/models/Humanoid.yo", false);
+	hro::ConvertModel("assets/models/Running.dae", "assets/models/Running.yo", false);
+
+	//printf("\n\n");
+	//hro::ConvertModel("assets/models/mutant.fbx", "assets/models/mutant.yo", true);
 
 	//printf("\n\n");
 	// hro::ConvertTexture("assets/textures/people_texture_map.png", "assets/textures/people_texture_map.yo");

@@ -24,7 +24,6 @@ void hro::Model::PackImpl(const AssetInfo* in, void* raw_data, size_t raw_data_s
 
 	meta_data["mesh_count"] = mesh_infos.size();
 	meta_data["mesh_infos"] = nlohmann::json::array();
-
 	for(const MeshInfo& mesh_info : mesh_infos)
 	{
 		nlohmann::json mesh_info_meta_data;
@@ -69,6 +68,12 @@ void hro::Model::PackImpl(const AssetInfo* in, void* raw_data, size_t raw_data_s
 		meta_data["materials"].push_back(material_meta_data);
 	}
 
+	meta_data["animation_paths"] = nlohmann::json::array();
+	for(const std::string path : animation_paths)
+	{
+		meta_data["animation_paths"].push_back(path);
+	}
+
 	int compressed_bound = LZ4_compressBound(info->UnpackedSize());
 	packed_data.resize(compressed_bound);
 	int compressed_size = LZ4_compress_default((const char*)raw_data, packed_data.data(), raw_data_size, compressed_bound);
@@ -108,6 +113,12 @@ void hro::Model::UnpackImpl(const AssetInfo* in, void* dst_buffer)
 		}
 
 		mesh_infos.push_back(mesh_info);
+	}
+
+	nlohmann::json animation_paths_meta_data = metadata["animation_paths"];
+	for (nlohmann::json::iterator it = animation_paths_meta_data.begin(); it != animation_paths_meta_data.end(); it++)
+	{
+		animation_paths.push_back((*it));
 	}
 
 	if (info->compression_mode == CompressionMode::LZ4)

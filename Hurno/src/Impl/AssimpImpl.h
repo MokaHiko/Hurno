@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <assimp/scene.h>
 #include <filesystem>
 #include <unordered_map>
@@ -35,6 +36,7 @@ public:
     uint64_t bone_count() { return joints.size(); }
 public:
     // Meta data
+    std::string model_file_path;
     std::vector<hro::MeshInfo> mesh_infos = {};
     std::vector<hro::Material> materials = {};
     hro::SkeletalMesh skeletal_mesh;    
@@ -81,8 +83,10 @@ public:
 		}
     }
 
-    void LoadScene(const aiScene* scene)
+    void LoadScene(const aiScene* scene, const char* file_path)
     {
+        model_file_path = file_path;
+
         uint32_t mesh_count = scene->mNumMeshes;
         uint32_t material_count = scene->mNumMaterials;
 
@@ -212,13 +216,14 @@ private:
         {
             aiVector3D position = mesh->mVertices[i];
             aiVector3D normal = {0.0f, 0.0f, 0.0f};
+            aiVector3D tangent = mesh->mTangents[i];
 
             if (mesh->HasNormals())
             {
                 normal = mesh->mNormals[i];
             }
 
-            hro::Vertex_F32_PNCV vertex = {};
+            hro::Vertex_F32_PNCVT vertex = {};
 
             vertex.position[0] = position.x;
             vertex.position[1] = position.y;
@@ -226,6 +231,10 @@ private:
 
             vertex.normal[0] = normal.x;
             vertex.normal[1] = normal.y;
+
+            vertex.tangent[0] = tangent[0];
+            vertex.tangent[1] = tangent[1];
+            vertex.tangent[2] = tangent[2];
 
             if (mesh->HasTextureCoords(0))
             {
@@ -296,8 +305,8 @@ private:
         }
 
         hro::MeshInfo mesh_info = {};
-        mesh_info.vertex_format = hro::VertexFormat::F32_PNCV;
-        mesh_info.vertex_buffer_size = mesh->mNumVertices * sizeof(hro::Vertex_F32_PNCV);
+        mesh_info.vertex_format = hro::VertexFormat::F32_PNCVT;
+        mesh_info.vertex_buffer_size = mesh->mNumVertices * sizeof(hro::Vertex_F32_PNCVT);
 
         mesh_info.index_format = hro::IndexFormat::UINT32;
         mesh_info.index_buffer_size = mesh_index_count * sizeof(uint32_t);
@@ -320,6 +329,7 @@ private:
 
     void ProcessMaterials(const aiScene* scene)
     {
+        const std::string file_extension = std::filesystem::path(model_file_path).extension().string();
         for (uint32_t i = 0; i < scene->mNumMaterials; i++)
         {
             hro::Material material = {};
@@ -373,7 +383,19 @@ private:
 
             // Textures
             material.diffuse_texture_path = convert_material_texture(ai_material, aiTextureType_DIFFUSE, scene);
+            material.ambient_texture_path = convert_material_texture(ai_material, aiTextureType_AMBIENT, scene);
             material.specular_texture_path = convert_material_texture(ai_material, aiTextureType_SPECULAR, scene);
+
+            material.normal_texture_path = convert_material_texture(ai_material, aiTextureType_NORMALS, scene);
+
+            if (file_extension == ".obj" && material.normal_texture_path.empty())
+            {
+                material.normal_texture_path = convert_material_texture(ai_material, aiTextureType_DISPLACEMENT, scene);
+            }
+            else
+            {
+                material.displacement_texture_path = convert_material_texture(ai_material, aiTextureType_DISPLACEMENT, scene);
+            }
 
             material.name = name;
             materials.push_back(material);

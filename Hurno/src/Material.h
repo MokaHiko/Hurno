@@ -28,9 +28,12 @@ namespace hro
     float diffuse_color[3];
     float specular_color[3];
 
+    std::string ambient_texture_path;
     std::string diffuse_texture_path;
     std::string specular_texture_path;
+
     std::string normal_texture_path;
+    std::string displacement_texture_path;
   protected:
     virtual void PackImpl(const AssetInfo* in, void* raw_data, size_t raw_data_size) override;
     virtual void UnpackImpl(const AssetInfo* in, void* dst_buffer) override;

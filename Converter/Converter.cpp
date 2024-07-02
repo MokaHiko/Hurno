@@ -1,7 +1,10 @@
 #include <Hurno.h>
 #include <SkeletalMesh.h>
 
-void PrintFullPath(char* partialPath)
+#include <filesystem>
+#include <iostream>
+
+static void PrintFullPath(char *partialPath)
 {
 	char full[_MAX_PATH];
 	if (_fullpath(full, partialPath, _MAX_PATH) != NULL)
@@ -10,43 +13,81 @@ void PrintFullPath(char* partialPath)
 		printf("Invalid path\n");
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-	PrintFullPath(".\\");
+	std::filesystem::path conversion_path = std::filesystem::current_path();
 
-	//printf("\n\n");
-	//hro::ConvertModel("assets/models/plane.fbx", "assets/models/plane.yo", true);
-	//printf("\n\n");
-	//hro::ConvertModel("assets/models/pine.obj", "assets/models/pine.yo", true);
-	//printf("\n\n");
-	//hro::ConvertModel("assets/models/cube.obj", "assets/models/cube.yo");
-	//
-	//printf("\n\n");
-	//hro::ConvertModel("assets/models/character-digger.fbx", "assets/models/character-digger.yo", true);
+	bool force_reconvert = false;
+	if (argc > 1)
+	{
+		if (strcmp(argv[1], "--force") == 0)
+		{
+			printf("Full reconvert!\n");
+			force_reconvert = true;
+		}
+	}
+	if (argc > 2)
+	{
+		conversion_path = std::filesystem::path(argv[2]);
+	}
 
-	//printf("\n\n");
-	//hro::ConvertModel("assets/models/Peasant.fbx", "assets/models/Peasant.yo", false);
+	using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
+	std::error_code e;
+	for (const auto &dir_entry: recursive_directory_iterator(std::filesystem::current_path()))
+	{
+		if(dir_entry.is_directory(e))
+		{
+		}
+		else if(dir_entry.is_regular_file(e))
+		{
+			auto file_path = std::filesystem::path(dir_entry);
+			auto extension = file_path.extension();
 
-	//printf("\n\n");
-	//hro::ConvertModel("assets/models/Humanoid.dae", "assets/models/Humanoid.yo", false);
-	//hro::ConvertModel("assets/models/HipHopDancing.dae", "assets/models/Humanoid.yo", false);
-	hro::ConvertModel("assets/models/Running.dae", "assets/models/Running.yo", false);
+			if (file_path.extension() == ".yo")
+			{
+				continue;
+			}
 
-	//printf("\n\n");
-	//hro::ConvertModel("assets/models/mutant.fbx", "assets/models/mutant.yo", true);
+			if(file_path.extension() == ".png" || file_path.extension() == ".jpg" || file_path.extension() == ".tga")
+			{
+				const std::string in_path = file_path.generic_string();
+				const std::string out_path = file_path.replace_extension(".yo").generic_string();
 
-	//printf("\n\n");
-	// hro::ConvertTexture("assets/textures/people_texture_map.png", "assets/textures/people_texture_map.yo");
-	//hro::ConvertTexture("assets/textures/colormap.png", "assets/textures/colormap.yo");
-	//hro::ConvertTexture("assets/textures/prototype_512x512_white.png", "assets/textures/prototype_512x512_white.yo");
+				if (std::filesystem::exists(out_path) && !force_reconvert) 
+				{
+                    continue;
+                }
 
-	//hro::SkeletalMesh sk_mesh = {};
-	//hro::AssetInfo sk_info = {};
-	//sk_mesh.Load("assets/skeletal_meshes/test.yskmesh");
+				std::cout << "Converting: " << file_path << std::endl;
+				hro::ConvertTexture(in_path.c_str(), out_path.c_str());
+			}
 
-	//sk_mesh.ParseInfo(&sk_info);
-	//sk_mesh.Unpack(&sk_info, nullptr);
+			if(file_path.extension() == ".obj")
+			{
+				const std::string in_path = file_path.generic_string();
+				const std::string out_path = file_path.replace_extension(".yo").generic_string();
 
+				if (std::filesystem::exists(out_path) && !force_reconvert) 
+				{
+                    continue;
+                }
+
+				std::cout << "Converting: " << file_path << std::endl;
+				hro::ConvertModel(in_path.c_str(), out_path.c_str(), true);
+			}
+		}
+		else if(e)
+		{
+			std::cerr << "Error in regular file!" << std::endl;
+		}
+	}
+
+	// hro::SkeletalMesh sk_mesh = {};
+	// hro::AssetInfo sk_info = {};
+	// sk_mesh.Load("assets/skeletal_meshes/test.yskmesh");
+
+	// sk_mesh.ParseInfo(&sk_info);
+	// sk_mesh.Unpack(&sk_info, nullptr);
 
 	return 0;
 }

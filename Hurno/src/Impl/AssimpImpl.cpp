@@ -47,7 +47,7 @@ namespace hro
 		auto start = std::chrono::high_resolution_clock::now();
 
 		AssimpLoader* model_loader = new AssimpLoader();
-		model_loader->LoadScene(scene);
+		model_loader->LoadScene(scene, path);
 
 		auto end = std::chrono::high_resolution_clock::now();
 
@@ -132,6 +132,8 @@ namespace hro
 			uint64_t buffer_size = info.UnpackedSize();
 			void* data = malloc(buffer_size);
 
+			assert(data != nullptr && "Cannot compress 0 bytes!");
+
 			memcpy((char*)data, model_loader->vertex_bone_map_data(), info.bone_mapping_size);
 			memcpy((char*)data + info.bone_mapping_size, model_loader->bones_data(), info.bone_matrices_size);
 
@@ -151,9 +153,9 @@ namespace hro
 				for (int i = 0; i < model.mesh_infos.size(); i++)
 				{
 					const MeshInfo& mesh_info = model.mesh_infos[i];
-					if (mesh_info.vertex_format == VertexFormat::F32_PNCV)
+					if (mesh_info.vertex_format == VertexFormat::F32_PNCVT)
 					{
-						total_vertices += mesh_info.vertex_buffer_size / sizeof(Vertex_F32_PNCV);
+						total_vertices += mesh_info.vertex_buffer_size / sizeof(Vertex_F32_PNCVT);
 					}
 					if (mesh_info.index_format == IndexFormat::UINT32)
 					{

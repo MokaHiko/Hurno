@@ -61,9 +61,12 @@ void hro::Model::PackImpl(const AssetInfo* in, void* raw_data, size_t raw_data_s
 		const float* specular = material.specular_color;
 		material_meta_data["specular_color"] = { specular[0], specular[1], specular[2] };
 
+		material_meta_data["ambient_texture_path"] = info->materials[i].ambient_texture_path.c_str();
 		material_meta_data["diffuse_texture_path"] = info->materials[i].diffuse_texture_path.c_str();
 		material_meta_data["specular_texture_path"] = info->materials[i].specular_texture_path.c_str();
+
 		material_meta_data["normal_texture_path"] = info->materials[i].normal_texture_path.c_str();
+		material_meta_data["displacement_texture_path"] = info->materials[i].displacement_texture_path.c_str();
 
 		meta_data["materials"].push_back(material_meta_data);
 	}
@@ -189,8 +192,12 @@ void hro::Model::ParseInfo(AssetInfo* out)
 		material.specular_color[1] = specular[1];
 		material.specular_color[2] = specular[2];
 
+		material.ambient_texture_path = (*it)["ambient_texture_path"];
 		material.diffuse_texture_path = (*it)["diffuse_texture_path"];
 		material.specular_texture_path = (*it)["specular_texture_path"];
+
+		material.normal_texture_path = (*it)["normal_texture_path"];
+		material.displacement_texture_path = (*it)["displacement_texture_path"];
 
 		info->materials[material_counter++] = material;
 	}

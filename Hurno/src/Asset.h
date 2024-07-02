@@ -17,7 +17,7 @@ namespace hro
     const std::string FileNameFromFullPath(const std::string& full_path);
 
     const int ASSET_TYPE_SIZE = 4;
-    struct AssetInfo
+    struct HAPI AssetInfo
     {
         CompressionMode compression_mode;
         uint64_t raw_data_size = 0;

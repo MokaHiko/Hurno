@@ -11,12 +11,13 @@
 namespace hro
 {
     // Vertex format all in f32
-    struct HAPI Vertex_F32_PNCV
+    struct HAPI Vertex_F32_PNCVT
     {
         float position[3];
         float color[3];
         float normal[3];
         float uv[2];
+        float tangent[3];
     };
 
     struct HAPI Vertex_F32_PNCV_U32F32_BIW
@@ -33,7 +34,7 @@ namespace hro
     enum class VertexFormat : uint8_t
     {
         Uknown,
-        F32_PNCV
+        F32_PNCVT
     };
 
     enum class IndexFormat : uint8_t
@@ -126,7 +127,7 @@ namespace hro
         CompressionMode compression_mode;
         std::string original_file_path;
 
-        std::vector<Vertex_F32_PNCV> vertices;
+        std::vector<Vertex_F32_PNCVT> vertices;
         std::vector<uint32_t> indices;
     protected:
         virtual void PackImpl() override;

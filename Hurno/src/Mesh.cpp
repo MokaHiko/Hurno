@@ -11,8 +11,8 @@ namespace hro
 
 		switch (vertex_format)
 		{
-		case (VertexFormat::F32_PNCV):
-			vertex_size = sizeof(Vertex_F32_PNCV);
+		case (VertexFormat::F32_PNCVT):
+			vertex_size = sizeof(Vertex_F32_PNCVT);
 			break;
 		default:
 			printf("Uknown vertex format!");
@@ -52,7 +52,7 @@ namespace hro
 
 		version = 1;
 		
-		uint64_t vertex_buffer_size = vertices.size() * sizeof(Vertex_F32_PNCV);
+		uint64_t vertex_buffer_size = vertices.size() * sizeof(Vertex_F32_PNCVT);
 		uint64_t index_buffer_size = indices.size() * sizeof(uint32_t);
 		uint64_t buffer_size = vertex_buffer_size + index_buffer_size;
 
@@ -86,7 +86,7 @@ namespace hro
 		uint64_t index_buffer_size = meta_data["index_buffer_size"];
 		uint64_t buffer_size = vertex_buffer_size + index_buffer_size;
 
-		uint64_t vertex_count = vertex_buffer_size  / sizeof(Vertex_F32_PNCV);
+		uint64_t vertex_count = vertex_buffer_size  / sizeof(Vertex_F32_PNCVT);
 		uint64_t index_count = index_buffer_size / sizeof(uint32_t);
 
 		meta_data["compression_mode"] = "LZ4";

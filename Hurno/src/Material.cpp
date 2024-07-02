@@ -6,7 +6,6 @@ namespace hro
 {
 	Material::Material()
 	{
-
 	}
 
 	Material::~Material()
